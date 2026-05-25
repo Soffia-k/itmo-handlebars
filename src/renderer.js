@@ -73,6 +73,10 @@ function renderTemplate(templatePath, contextPath) {
   const templateSource = readTemplate(templatePath);
   const context = readContext(contextPath);
 
+  return renderTemplateFromSource(templateSource, context);
+}
+
+function renderTemplateFromSource(templateSource, context) {
   try {
     const template = Handlebars.compile(templateSource, { strict: true });
     return template(context);
@@ -103,6 +107,7 @@ function run(argv = process.argv.slice(2), streams = process) {
 module.exports = {
   CliError,
   parseArgs,
+  renderTemplateFromSource,
   renderTemplate,
   run,
   writeOutput

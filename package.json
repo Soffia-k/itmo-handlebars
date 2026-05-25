@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "vitest run",
-    "render:example": "node bin/hbs-runner.js --template templates/example.hbs --context data/context.json"
+    "render:example": "node bin/hbs-runner.js --template templates/example.hbs --context data/context.json",
+    "sandbox": "node src/server.js"
   },
   "keywords": [
     "handlebars",

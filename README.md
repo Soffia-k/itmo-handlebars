@@ -1,8 +1,11 @@
 # itmo-handlebars
 
-Учебный Node.js CLI-инструмент для генерации HTML или текста из Handlebars-шаблона и JSON-контекста.
+Учебный проект для рендеринга Handlebars-шаблонов из JSON-контекста.
 
-Проект подготовлен для магистерского задания по направлению "Веб-Технологии": анализ генерации инструмента для прогона данных через шаблоны Handlebars с помощью Codex.
+Сейчас проект включает:
+- CLI-инструмент;
+- HTTP-сервер;
+- веб-песочницу на React (JSX) для ручной проверки шаблонов.
 
 ## Установка
 
@@ -10,86 +13,79 @@
 npm install
 ```
 
-## Запуск примера
+## Быстрый старт
 
-Вывести результат в stdout:
+Запуск примера CLI:
 
 ```bash
 npm run render:example
 ```
 
-Записать результат в файл:
+Запуск веб-песочницы:
+
+```bash
+npm run sandbox
+```
+
+После запуска откройте:
+
+`http://127.0.0.1:3000`
+
+## Скрипты
+
+- `npm test` — запуск тестов Vitest.
+- `npm run render:example` — рендер примера из `templates/example.hbs` и `data/context.json`.
+- `npm run sandbox` — запуск HTTP-сервера с веб-интерфейсом.
+
+## CLI
+
+Точка входа: `bin/hbs-runner.js`
+
+Аргументы:
+
+| Аргумент | Обязательный | Описание |
+| --- | --- | --- |
+| `--template <path>` | да | Путь к `.hbs` шаблону. |
+| `--context <path>` | да | Путь к `.json` файлу с контекстом. |
+| `--out <path>` | нет | Путь для записи результата (если не указан, вывод в stdout). |
+
+Пример:
 
 ```bash
 node bin/hbs-runner.js --template templates/example.hbs --context data/context.json --out dist/example.html
 ```
 
-## Запуск тестов
+## Веб-песочница
 
-```bash
-npm test
-```
+Бэкенд:
+- `GET /` — страница песочницы;
+- `POST /api/render` — рендер шаблона.
 
-## CLI-аргументы
-
-| Аргумент | Обязательный | Описание |
-| --- | --- | --- |
-| `--template <path>` | да | Путь к Handlebars-шаблону `.hbs`. |
-| `--context <path>` | да | Путь к JSON-файлу с данными. |
-| `--out <path>` | нет | Путь для записи результата. Если не указан, результат выводится в stdout. |
-
-## Обработка ошибок
-
-CLI сообщает об ошибке и завершает работу с ненулевым кодом, если:
-
-- не переданы обязательные аргументы;
-- файл шаблона не найден;
-- файл JSON-контекста не найден;
-- JSON невалидный;
-- Handlebars не смог скомпилировать или отрендерить шаблон.
-
-Демонстрация ошибки JSON:
-
-```bash
-node bin/hbs-runner.js --template templates/example.hbs --context data/broken-context.json
-```
-
-## Пример входных данных
-
-Шаблон `templates/example.hbs` использует вложенные поля и `each`-блок:
-
-```hbs
-<h1>{{page.title}}</h1>
-<p>Автор: {{author.name}}, {{author.group}}</p>
-<ul>
-  {{#each topics}}
-    <li>{{this}}</li>
-  {{/each}}
-</ul>
-```
-
-Контекст `data/context.json`:
+Тело запроса `POST /api/render`:
 
 ```json
 {
-  "page": {
-    "title": "Демонстрация Handlebars CLI"
-  },
-  "author": {
-    "name": "Студент магистратуры",
-    "group": "Веб-Технологии"
-  },
-  "topics": [
-    "шаблон Handlebars",
-    "JSON-контекст",
-    "генерация HTML"
-  ]
+  "template": "Hello, {{name}}!",
+  "context": "{\"name\":\"ITMO\"}"
 }
 ```
 
-Фрагмент результата:
+Ответ:
 
-```html
-<h1>Демонстрация Handlebars CLI</h1>
-<p>Автор: Студент магистратуры, Веб-Технологии</p>
+```json
+{
+  "output": "Hello, ITMO!"
+}
 ```
+
+При ошибках возвращается JSON с полем `error` и кодом `400`/`500`.
+
+## Структура проекта
+
+- `src/renderer.js` — общая логика рендера и CLI-вспомогательные функции.
+- `src/server.js` — HTTP-сервер и API.
+- `public/index.html` — HTML-оболочка фронтенда.
+- `public/app.jsx` — React-компонент песочницы.
+- `public/styles.css` — стили интерфейса.
+- `bin/hbs-runner.js` — CLI-обертка.
+- `test/renderer.test.mjs` — тесты рендера.
