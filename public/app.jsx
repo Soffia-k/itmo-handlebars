@@ -169,7 +169,7 @@ function SandboxApp() {
         />
 
         <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Рендеринг...' : 'Отправить на бэк'}
+          {isLoading ? 'Рендеринг...' : 'Отрендерить'}
         </button>
       </form>
 
