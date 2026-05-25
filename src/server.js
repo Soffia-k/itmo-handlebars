@@ -44,8 +44,8 @@ function createServer() {
       return;
     }
 
-    if (req.method === 'GET' && req.url === '/app.js') {
-      sendFile(res, path.join(publicDir, 'app.js'), 'application/javascript');
+    if (req.method === 'GET' && req.url === '/app.jsx') {
+      sendFile(res, path.join(publicDir, 'app.jsx'), 'application/javascript');
       return;
     }
 
