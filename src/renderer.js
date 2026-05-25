@@ -2,6 +2,15 @@ const fs = require('fs');
 const path = require('path');
 const Handlebars = require('handlebars');
 
+// Добавляем поддержку других движков
+let pug, nunjucks;
+try {
+  pug = require('pug');
+} catch (e) { /* pug not installed */ }
+try {
+  nunjucks = require('nunjucks');
+} catch (e) { /* nunjucks not installed */ }
+
 class CliError extends Error {
   constructor(message, code = 1) {
     super(message);
@@ -11,12 +20,12 @@ class CliError extends Error {
 }
 
 function parseArgs(argv) {
-  const options = {};
+  const options = { engine: 'handlebars' };
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
 
-    if (arg === '--template' || arg === '--context' || arg === '--out') {
+    if (arg === '--template' || arg === '--context' || arg === '--out' || arg === '--engine') {
       const key = arg.slice(2);
       const value = argv[i + 1];
 
@@ -69,20 +78,34 @@ function readContext(contextPath) {
   }
 }
 
-function renderTemplate(templatePath, contextPath) {
-  const templateSource = readTemplate(templatePath);
-  const context = readContext(contextPath);
-
-  return renderTemplateFromSource(templateSource, context);
+// Основная функция рендеринга с поддержкой разных движков
+function renderTemplateFromSource(templateSource, context, engine = 'handlebars') {
+  try {
+    switch (engine.toLowerCase()) {
+      case 'pug':
+        if (!pug) throw new Error('Pug is not installed. Run: npm install pug');
+        const compiledPug = pug.compile(templateSource);
+        return compiledPug(context);
+      
+      case 'nunjucks':
+      case 'jinja2':
+        if (!nunjucks) throw new Error('Nunjucks is not installed. Run: npm install nunjucks');
+        return nunjucks.renderString(templateSource, context);
+      
+      case 'handlebars':
+      default:
+        const template = Handlebars.compile(templateSource, { strict: true });
+        return template(context);
+    }
+  } catch (error) {
+    throw new CliError(`Template rendering failed (${engine}): ${error.message}`);
+  }
 }
 
-function renderTemplateFromSource(templateSource, context) {
-  try {
-    const template = Handlebars.compile(templateSource, { strict: true });
-    return template(context);
-  } catch (error) {
-    throw new CliError(`Template rendering failed: ${error.message}`);
-  }
+function renderTemplate(templatePath, contextPath, engine = 'handlebars') {
+  const templateSource = readTemplate(templatePath);
+  const context = readContext(contextPath);
+  return renderTemplateFromSource(templateSource, context, engine);
 }
 
 function writeOutput(outPath, result) {
@@ -93,7 +116,7 @@ function writeOutput(outPath, result) {
 
 function run(argv = process.argv.slice(2), streams = process) {
   const options = parseArgs(argv);
-  const result = renderTemplate(options.template, options.context);
+  const result = renderTemplate(options.template, options.context, options.engine);
 
   if (options.out) {
     writeOutput(options.out, result);
@@ -104,11 +127,20 @@ function run(argv = process.argv.slice(2), streams = process) {
   return result;
 }
 
+// Экспортируем список доступных движков
+function getAvailableEngines() {
+  const engines = ['handlebars'];
+  if (pug) engines.push('pug');
+  if (nunjucks) engines.push('nunjucks', 'jinja2');
+  return engines;
+}
+
 module.exports = {
   CliError,
   parseArgs,
   renderTemplateFromSource,
   renderTemplate,
   run,
-  writeOutput
+  writeOutput,
+  getAvailableEngines  // новая функция
 };

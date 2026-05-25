@@ -20,7 +20,9 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "handlebars": "^4.7.8"
+    "handlebars": "^4.7.9",
+    "nunjucks": "^3.2.4",
+    "pug": "^3.0.4"
   },
   "devDependencies": {
     "vitest": "^1.6.0"

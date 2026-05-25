@@ -1,7 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { renderTemplateFromSource, CliError } = require('./renderer');
+const { renderTemplateFromSource, CliError, getAvailableEngines } = require('./renderer');
 
 const host = '127.0.0.1';
 const port = Number(process.env.PORT) || 3000;
@@ -54,10 +54,17 @@ function createServer() {
       return;
     }
 
+    // API endpoint для получения списка движков
+    if (req.method === 'GET' && req.url === '/api/engines') {
+      const engines = getAvailableEngines();
+      sendJson(res, 200, { engines });
+      return;
+    }
+
     if (req.method === 'POST' && req.url === '/api/render') {
       try {
         const rawBody = await collectRequestBody(req);
-        const { template, context } = JSON.parse(rawBody);
+        const { template, context, engine = 'handlebars' } = JSON.parse(rawBody);
 
         if (typeof template !== 'string' || template.trim() === '') {
           sendJson(res, 400, { error: 'Template is required.' });
@@ -72,7 +79,7 @@ function createServer() {
           return;
         }
 
-        const output = renderTemplateFromSource(template, parsedContext);
+        const output = renderTemplateFromSource(template, parsedContext, engine);
         sendJson(res, 200, { output });
       } catch (error) {
         if (error instanceof CliError) {
@@ -85,6 +92,7 @@ function createServer() {
           return;
         }
 
+        console.error(error);
         sendJson(res, 500, { error: 'Internal server error.' });
       }
       return;
@@ -99,6 +107,7 @@ if (require.main === module) {
   const server = createServer();
   server.listen(port, host, () => {
     process.stdout.write(`Sandbox server is running at http://${host}:${port}\n`);
+    process.stdout.write(`Available engines: ${getAvailableEngines().join(', ')}\n`);
   });
 }
 
