@@ -1,0 +1,14 @@
+{
+  "page": {
+    "title": "Демонстрация Handlebars CLI"
+  },
+  "author": {
+    "name": "Студент магистратуры",
+    "group": "Веб-Технологии"
+  },
+  "topics": [
+    "шаблон Handlebars",
+    "JSON-контекст",
+    "генерация HTML"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "name": "itmo-handlebars",
+  "version": "1.0.0",
+  "description": "Node.js CLI for rendering Handlebars templates with JSON context.",
+  "main": "src/renderer.js",
+  "bin": {
+    "itmo-handlebars": "bin/hbs-runner.js"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "render:example": "node bin/hbs-runner.js --template templates/example.hbs --context data/context.json"
+  },
+  "keywords": [
+    "handlebars",
+    "cli",
+    "templates",
+    "itmo"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "handlebars": "^4.7.8"
+  },
+  "devDependencies": {
+    "vitest": "^1.6.0"
+  }
+}

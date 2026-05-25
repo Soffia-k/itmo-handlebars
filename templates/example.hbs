@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>{{page.title}}</title>
+</head>
+<body>
+  <h1>{{page.title}}</h1>
+  <p>Автор: {{author.name}}, {{author.group}}</p>
+
+  <h2>Темы</h2>
+  <ul>
+    {{#each topics}}
+      <li>{{this}}</li>
+    {{/each}}
+  </ul>
+</body>
+</html>
